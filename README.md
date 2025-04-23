@@ -1,4 +1,4 @@
-# Finance Tracker
+# Fintrixx - A Finance Web App
 
 A modern web application for tracking personal finances, built with Next.js and Clerk authentication.
 
