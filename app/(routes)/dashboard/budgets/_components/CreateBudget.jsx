@@ -17,6 +17,7 @@ import { db } from "@/utils/dbConfig";
 import { Budgets } from "@/utils/schema";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
+import { formatCurrency } from "@/utils/currency";
 
 function CreateBudget({ refreshData }) {
   const [emojiIcon, setEmojiIcon] = useState("😀");
@@ -63,41 +64,48 @@ function CreateBudget({ refreshData }) {
           <DialogHeader>
             <DialogTitle>Create New Budget</DialogTitle>
             <DialogDescription>
-              <div className="mt-5">
-                <Button
-                  variant="outline"
-                  className="text-lg"
-                  onClick={() => setOpenEmojiPicker(!openEmojiPicker)}
-                >
-                  {emojiIcon}
-                </Button>
+              Create a new budget to track your expenses
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-5">
+            <div className="relative">
+              <Button
+                variant="outline"
+                className="text-lg"
+                onClick={() => setOpenEmojiPicker(!openEmojiPicker)}
+              >
+                {emojiIcon}
+              </Button>
+              {openEmojiPicker && (
                 <div className="absolute z-20">
                   <EmojiPicker
-                    open={openEmojiPicker}
                     onEmojiClick={(e) => {
                       setEmojiIcon(e.emoji);
                       setOpenEmojiPicker(false);
                     }}
                   />
                 </div>
-                <div className="mt-2">
-                  <h2 className="text-black font-medium my-1">Budget Name</h2>
-                  <Input
-                    placeholder="e.g. Home Decor"
-                    onChange={(e) => setName(e.target.value)}
-                  />
-                </div>
-                <div className="mt-2">
-                  <h2 className="text-black font-medium my-1">Budget Amount</h2>
-                  <Input
-                    type="number"
-                    placeholder="e.g. 5000$"
-                    onChange={(e) => setAmount(e.target.value)}
-                  />
-                </div>
-              </div>
-            </DialogDescription>
-          </DialogHeader>
+              )}
+            </div>
+            <div className="mt-2">
+              <h2 className="text-black font-medium my-1">Budget Name</h2>
+              <Input
+                placeholder="e.g. Home Decor"
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+            <div className="mt-2">
+              <h2 className="text-black font-medium my-1">Budget Amount</h2>
+              <Input
+                type="number"
+                placeholder="e.g. 5000"
+                onChange={(e) => setAmount(Number(e.target.value))}
+              />
+              <span className="text-sm text-gray-500">
+                Current Amount: {formatCurrency(amount || 0)}
+              </span>
+            </div>
+          </div>
           <DialogFooter className="sm:justify-start">
             <DialogClose asChild>
               <Button

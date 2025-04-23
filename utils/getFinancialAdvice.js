@@ -23,7 +23,7 @@ const getFinancialAdvice = async (totalBudget, totalIncome, totalSpend) => {
 
     // Send the prompt to the OpenAI API
     const chatCompletion = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o",
       messages: [{ role: "user", content: userPrompt }],
     });
 
@@ -34,7 +34,20 @@ const getFinancialAdvice = async (totalBudget, totalIncome, totalSpend) => {
     return advice;
   } catch (error) {
     console.error("Error fetching financial advice:", error);
-    return "Sorry, I couldn't fetch the financial advice at this moment. Please try again later.";
+    
+    // Generate fallback advice based on the financial data
+    const savingsRate = ((totalIncome - totalSpend) / totalIncome) * 100;
+    let fallbackAdvice = "";
+    
+    if (savingsRate > 20) {
+      fallbackAdvice = "Great job! You're saving more than 20% of your income. Consider investing some of your savings for long-term growth.";
+    } else if (savingsRate > 0) {
+      fallbackAdvice = "You're saving some money, which is good. Try to increase your savings rate by cutting unnecessary expenses.";
+    } else {
+      fallbackAdvice = "You're spending more than you earn. Consider reviewing your expenses and creating a stricter budget.";
+    }
+    
+    return fallbackAdvice;
   }
 };
 

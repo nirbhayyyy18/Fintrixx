@@ -16,12 +16,18 @@ function DashboardLayout({ children }) {
   }, [user]);
 
   const checkUserBudgets = async () => {
-    const result = await db
-      .select()
-      .from(Budgets)
-      .where(eq(Budgets.createdBy, user?.primaryEmailAddress?.emailAddress));
-    console.log(result);
-    if (result?.length == 0) {
+    try {
+      const result = await db
+        .select()
+        .from(Budgets)
+        .where(eq(Budgets.createdBy, user?.primaryEmailAddress?.emailAddress));
+      
+      if (result?.length == 0) {
+        router.replace("/dashboard/budgets");
+      }
+    } catch (error) {
+      console.error("Error checking budgets:", error);
+      // If table doesn't exist, redirect to budgets page
       router.replace("/dashboard/budgets");
     }
   };

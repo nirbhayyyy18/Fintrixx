@@ -8,15 +8,17 @@ import { Budgets, Expenses, Incomes } from "@/utils/schema";
 import BarChartDashboard from "./_components/BarChartDashboard";
 import BudgetItem from "./budgets/_components/BudgetItem";
 import ExpenseListTable from "./expenses/_components/ExpenseListTable";
+
 function Dashboard() {
   const { user } = useUser();
-
   const [budgetList, setBudgetList] = useState([]);
   const [incomeList, setIncomeList] = useState([]);
   const [expensesList, setExpensesList] = useState([]);
+
   useEffect(() => {
     user && getBudgetList();
   }, [user]);
+
   /**
    * used to get budget List
    */
@@ -24,7 +26,6 @@ function Dashboard() {
     const result = await db
       .select({
         ...getTableColumns(Budgets),
-
         totalSpend: sql`sum(${Expenses.amount})`.mapWith(Number),
         totalItem: sql`count(${Expenses.id})`.mapWith(Number),
       })
@@ -33,6 +34,7 @@ function Dashboard() {
       .where(eq(Budgets.createdBy, user?.primaryEmailAddress?.emailAddress))
       .groupBy(Budgets.id)
       .orderBy(desc(Budgets.id));
+
     setBudgetList(result);
     getAllExpenses();
     getIncomeList();
@@ -46,12 +48,10 @@ function Dashboard() {
       const result = await db
         .select({
           ...getTableColumns(Incomes),
-          totalAmount: sql`SUM(CAST(${Incomes.amount} AS NUMERIC))`.mapWith(
-            Number
-          ),
+          totalAmount: sql`SUM(CAST(${Incomes.amount} AS NUMERIC))`.mapWith(Number),
         })
         .from(Incomes)
-        .groupBy(Incomes.id); // Assuming you want to group by ID or any other relevant column
+        .groupBy(Incomes.id);
 
       setIncomeList(result);
     } catch (error) {
@@ -72,17 +72,23 @@ function Dashboard() {
       })
       .from(Budgets)
       .rightJoin(Expenses, eq(Budgets.id, Expenses.budgetId))
-      .where(eq(Budgets.createdBy, user?.primaryEmailAddress.emailAddress))
+      .where(eq(Budgets.createdBy, user?.primaryEmailAddress?.emailAddress))
       .orderBy(desc(Expenses.id));
+
     setExpensesList(result);
   };
 
   return (
-    <div className="p-8 bg-">
-      <h2 className="font-bold text-4xl">Hi, {user?.fullName} 👋</h2>
-      <p className="text-gray-500">
-        Here's what happenning with your money, Lets Manage your expense
-      </p>
+    <div className="p-8">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="font-bold text-4xl">Hi, {user?.fullName} 👋</h2>
+          <p className="text-gray-500">
+            Here's what happenning with your money, Lets Manage your expense
+          </p>
+        </div>
+        <UserButton afterSignOutUrl="/" />
+      </div>
 
       <CardInfo budgetList={budgetList} incomeList={incomeList} />
       <div className="grid grid-cols-1 lg:grid-cols-3 mt-6 gap-5">

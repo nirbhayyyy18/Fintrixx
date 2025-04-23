@@ -29,9 +29,11 @@ function ExpensesScreen({ params }) {
   const [budgetInfo, setbudgetInfo] = useState();
   const [expensesList, setExpensesList] = useState([]);
   const route = useRouter();
+  const budgetId = React.use(params).id;
+
   useEffect(() => {
     user && getBudgetInfo();
-  }, [user]);
+  }, [user, budgetId]);
 
   /**
    * Get Budget Information
@@ -46,7 +48,7 @@ function ExpensesScreen({ params }) {
       .from(Budgets)
       .leftJoin(Expenses, eq(Budgets.id, Expenses.budgetId))
       .where(eq(Budgets.createdBy, user?.primaryEmailAddress?.emailAddress))
-      .where(eq(Budgets.id, params.id))
+      .where(eq(Budgets.id, budgetId))
       .groupBy(Budgets.id);
 
     setbudgetInfo(result[0]);
@@ -60,10 +62,9 @@ function ExpensesScreen({ params }) {
     const result = await db
       .select()
       .from(Expenses)
-      .where(eq(Expenses.budgetId, params.id))
+      .where(eq(Expenses.budgetId, budgetId))
       .orderBy(desc(Expenses.id));
     setExpensesList(result);
-    console.log(result);
   };
 
   /**
@@ -72,13 +73,13 @@ function ExpensesScreen({ params }) {
   const deleteBudget = async () => {
     const deleteExpenseResult = await db
       .delete(Expenses)
-      .where(eq(Expenses.budgetId, params.id))
+      .where(eq(Expenses.budgetId, budgetId))
       .returning();
 
     if (deleteExpenseResult) {
       const result = await db
         .delete(Budgets)
-        .where(eq(Budgets.id, params.id))
+        .where(eq(Budgets.id, budgetId))
         .returning();
     }
     toast("Budget Deleted !");
@@ -136,7 +137,7 @@ function ExpensesScreen({ params }) {
           ></div>
         )}
         <AddExpense
-          budgetId={params.id}
+          budgetId={budgetId}
           user={user}
           refreshData={() => getBudgetInfo()}
         />
